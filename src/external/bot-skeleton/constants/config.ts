@@ -275,7 +275,13 @@ export const config = () => ({
         [localize('Signal'), '2'],
     ],
     GOOGLE_DRIVE: {
-        SCOPE: 'https://www.googleapis.com/auth/drive.file',
+        // Full drive access required to allow users to load existing strategy files
+        // that may not have been created by this application. The previous scope
+        // 'drive.file' only allowed access to files created by the app, which
+        // prevented users from loading their existing XML strategy files.
+        // This broader scope enables users to access and load any XML files
+        // from their Google Drive for importing strategies.
+        SCOPE: 'https://www.googleapis.com/auth/drive',
         DISCOVERY_DOCS: 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
     },
     workspaces: {
