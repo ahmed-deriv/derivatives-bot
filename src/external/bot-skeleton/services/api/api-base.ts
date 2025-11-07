@@ -6,7 +6,12 @@ import { handleBackendError, isBackendError } from '@/utils/error-handler';
 import { setSessionToken } from '@/utils/session-token-utils';
 import { clearInvalidTokenParams } from '@/utils/url-utils';
 import { tradingTimesService } from '../../../../components/shared/services/trading-times-service';
-import { ACTIVE_SYMBOLS, generateDisplayName, MARKET_MAPPINGS } from '../../../../components/shared/utils/common-data';
+import {
+    ACTIVE_SYMBOLS,
+    generateDisplayName,
+    getMarketDisplayName,
+    getSubmarketDisplayName,
+} from '../../../../components/shared/utils/common-data';
 import { translateMarketCategory } from '../../../../utils/market-category-translator';
 import { observer as globalObserver } from '../../utils/observer';
 import { doUntilDone, socket_state } from '../tradeEngine/utils/helpers';
@@ -426,20 +431,6 @@ class APIBase {
     }
 
     /**
-     * Maps active symbols market codes to trading times market names
-     */
-    private getMarketMapping(): Map<string, string> {
-        return MARKET_MAPPINGS.MARKET_DISPLAY_NAMES;
-    }
-
-    /**
-     * Maps active symbols submarket codes to trading times submarket names
-     */
-    private getSubmarketMapping(): Map<string, string> {
-        return MARKET_MAPPINGS.SUBMARKET_DISPLAY_NAMES;
-    }
-
-    /**
      * Enriches active symbols with market display names from trading times
      */
     private async enrichActiveSymbolsWithTradingTimes(active_symbols: any[]) {
@@ -458,8 +449,6 @@ class APIBase {
             // Create lookup maps for efficient searching
             const market_display_names = new Map<string, string>();
             const submarket_display_names = new Map<string, string>();
-            const market_mapping = this.getMarketMapping();
-            const submarket_mapping = this.getSubmarketMapping();
 
             if (!trading_times.markets || !Array.isArray(trading_times.markets)) {
                 return active_symbols;
@@ -472,11 +461,10 @@ class APIBase {
                         const translatedMarketName = translateMarketCategory(market.name);
                         market_display_names.set(market.name, translatedMarketName);
 
-                        // Also create reverse mapping for market codes
-                        for (const [code, name] of market_mapping.entries()) {
-                            if (name === market.name) {
-                                market_display_names.set(code, translatedMarketName);
-                            }
+                        // Also use helper function to get market display name
+                        const helperMarketName = getMarketDisplayName(market.name);
+                        if (helperMarketName !== market.name) {
+                            market_display_names.set(market.name, translateMarketCategory(helperMarketName));
                         }
                     }
 
@@ -488,12 +476,15 @@ class APIBase {
                                 const key = `${market.name}_${submarket.name}`;
                                 submarket_display_names.set(key, translatedSubmarketName);
 
-                                // Also create mapping for market codes and submarket codes
-                                for (const [code, name] of market_mapping.entries()) {
-                                    if (name === market.name) {
-                                        const code_key = `${code}_${submarket.name}`;
-                                        submarket_display_names.set(code_key, translatedSubmarketName);
-                                    }
+                                // Also use helper function to get submarket display name
+                                const helperSubmarketName = getSubmarketDisplayName(submarket.name);
+                                if (helperSubmarketName !== submarket.name) {
+                                    submarket_display_names.set(
+                                        submarket.name,
+                                        translateMarketCategory(helperSubmarketName)
+                                    );
+                                    const code_key = `${market.name}_${submarket.name}`;
+                                    submarket_display_names.set(code_key, translateMarketCategory(helperSubmarketName));
                                 }
                             }
                         });
@@ -501,17 +492,6 @@ class APIBase {
                 });
             } catch (markets_error) {
                 return active_symbols;
-            }
-
-            // Add direct submarket code mappings
-            for (const [submarket_code, submarket_name] of submarket_mapping.entries()) {
-                submarket_display_names.set(submarket_code, submarket_name);
-
-                // Also add with market prefixes
-                for (const [market_code] of market_mapping.entries()) {
-                    const key = `${market_code}_${submarket_code}`;
-                    submarket_display_names.set(key, submarket_name);
-                }
             }
 
             // Create symbol display names lookup
@@ -539,12 +519,13 @@ class APIBase {
             return active_symbols.map(symbol => {
                 const enriched_symbol = { ...symbol };
 
-                // Add market display name using the name property from trading times
+                // Add market display name using helper function with fallback to trading times
                 if (symbol.market) {
-                    enriched_symbol.market_display_name = market_display_names.get(symbol.market) || symbol.market;
+                    enriched_symbol.market_display_name =
+                        market_display_names.get(symbol.market) || getMarketDisplayName(symbol.market);
                 }
 
-                // Add submarket display name using the name property from trading times
+                // Add submarket display name using helper function with fallback to trading times
                 if (symbol.submarket) {
                     // Try multiple lookup strategies for submarket
                     let submarket_display_name = symbol.submarket;
@@ -555,13 +536,18 @@ class APIBase {
                         submarket_display_name = submarket_display_names.get(submarket_key) || submarket_display_name;
                     }
 
-                    // 2. Try direct submarket code lookup
+                    // 2. Try direct submarket code lookup from trading times
                     submarket_display_name = submarket_display_names.get(symbol.submarket) || submarket_display_name;
+
+                    // 3. Fallback to helper function
+                    if (submarket_display_name === symbol.submarket) {
+                        submarket_display_name = getSubmarketDisplayName(symbol.submarket);
+                    }
 
                     enriched_symbol.submarket_display_name = submarket_display_name;
                 }
 
-                // Add subgroup display name if available using the name property from trading times
+                // Add subgroup display name using helper function with fallback to trading times
                 if (symbol.subgroup) {
                     let subgroup_display_name = symbol.subgroup;
 
@@ -571,8 +557,13 @@ class APIBase {
                         subgroup_display_name = submarket_display_names.get(subgroup_key) || subgroup_display_name;
                     }
 
-                    // Try direct subgroup code lookup
+                    // Try direct subgroup code lookup from trading times
                     subgroup_display_name = submarket_display_names.get(symbol.subgroup) || subgroup_display_name;
+
+                    // Fallback to helper function (uses submarket display name logic)
+                    if (subgroup_display_name === symbol.subgroup) {
+                        subgroup_display_name = getSubmarketDisplayName(symbol.subgroup);
+                    }
 
                     enriched_symbol.subgroup_display_name = subgroup_display_name;
                 }

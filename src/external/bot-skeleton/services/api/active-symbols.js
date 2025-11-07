@@ -1,7 +1,7 @@
 /* eslint-disable no-confusing-arrow */
 import {
     ACTIVE_SYMBOLS,
-    MARKET_MAPPINGS,
+    getSubmarketDisplayName,
     MARKET_OPTIONS,
     SUBMARKET_OPTIONS,
     SYMBOL_OPTIONS,
@@ -105,9 +105,12 @@ export default class ActiveSymbols {
             const { submarkets } = processed_symbols[symbol_market];
 
             if (!isExistingValue(submarkets, symbol_submarket)) {
-                // Use our custom submarket display name mapping, fallback to API display name, then submarket code
-                const custom_display_name = MARKET_MAPPINGS.SUBMARKET_DISPLAY_NAMES.get(symbol_submarket);
-                const display_name = custom_display_name || symbol.submarket_display_name || symbol_submarket;
+                // Use helper function to get submarket display name, fallback to API display name, then submarket code
+                const helper_display_name = getSubmarketDisplayName(symbol_submarket);
+                const display_name =
+                    helper_display_name !== symbol_submarket
+                        ? helper_display_name
+                        : symbol.submarket_display_name || symbol_submarket;
 
                 submarkets[symbol_submarket] = {
                     display_name: display_name,
