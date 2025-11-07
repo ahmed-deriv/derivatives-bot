@@ -1,21 +1,18 @@
-import { ComponentProps, useMemo } from 'react';
-import { FILTERED_LANGUAGES } from '@/utils/languages';
+import { ComponentProps } from 'react';
+import { LabelPairedGlobeSmRegularIcon } from '@deriv/quill-icons';
 import { useTranslations } from '@deriv-com/translations';
 import { Text, useDevice } from '@deriv-com/ui';
 
 type TMenuHeader = {
     hideLanguageSetting: boolean;
+    // Using ComponentProps<'button'>['onClick'] for better type safety and consistency
+    // with button onClick event handlers
     openLanguageSetting: ComponentProps<'button'>['onClick'];
 };
 
 const MenuHeader = ({ hideLanguageSetting, openLanguageSetting }: TMenuHeader) => {
     const { currentLang, localize } = useTranslations();
     const { isDesktop } = useDevice();
-
-    const countryIcon = useMemo(
-        () => FILTERED_LANGUAGES.find(({ code }) => code === currentLang)?.placeholderIconInMobile,
-        [currentLang]
-    );
 
     return (
         <div className='mobile-menu__header'>
@@ -31,7 +28,7 @@ const MenuHeader = ({ hideLanguageSetting, openLanguageSetting }: TMenuHeader) =
                     aria-expanded='false'
                     aria-haspopup='menu'
                 >
-                    {countryIcon}
+                    <LabelPairedGlobeSmRegularIcon />
                     <Text className='ml-[0.4rem]' size={isDesktop ? 'xs' : 'sm'} weight='bold'>
                         {currentLang}
                     </Text>

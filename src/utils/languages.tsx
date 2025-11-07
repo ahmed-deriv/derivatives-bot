@@ -7,6 +7,7 @@ import {
     FlagFranceIcon,
     FlagGermanyIcon,
     FlagItalyIcon,
+    FlagMongoliaIcon,
     FlagPolandIcon,
     FlagPortugalIcon,
     FlagRussiaIcon,
@@ -14,13 +15,14 @@ import {
     FlagSpainIcon,
     FlagSriLankaIcon,
     FlagTanzaniaIcon,
-    FlagThailandIcon,
     FlagTurkeyIcon,
     FlagUnitedKingdomIcon,
-    FlagUzbekistanIcon,
     FlagVietnamIcon,
 } from '@deriv/quill-icons/Flags';
 
+// NOTE: Language codes use uppercase format (EN, AR, etc.) instead of standard ISO 639-1
+// lowercase format (en, ar, etc.). This is a project convention for consistency with
+// the translation system. Ensure i18n/translation systems correctly map these codes.
 export const LANGUAGES = [
     {
         code: 'EN',
@@ -94,8 +96,15 @@ export const LANGUAGES = [
         placeholderIconInMobile: <FlagSouthKoreaIcon height={14.67} width={22} />,
     },
     {
+        code: 'MN',
+        displayName: 'Монгол',
+        icon: <FlagMongoliaIcon height={24} width={36} />,
+        placeholderIcon: <FlagMongoliaIcon height={12} width={18} />,
+        placeholderIconInMobile: <FlagMongoliaIcon height={14.67} width={22} />,
+    },
+    {
         code: 'PL',
-        displayName: 'Polish',
+        displayName: 'Polski',
         icon: <FlagPolandIcon height={24} width={36} />,
         placeholderIcon: <FlagPolandIcon height={12} width={18} />,
         placeholderIconInMobile: <FlagPolandIcon height={14.67} width={22} />,
@@ -122,11 +131,14 @@ export const LANGUAGES = [
         placeholderIconInMobile: <FlagSriLankaIcon height={14.67} width={22} />,
     },
     {
-        code: 'TH',
-        displayName: 'ไทย',
-        icon: <FlagThailandIcon height={24} width={36} />,
-        placeholderIcon: <FlagThailandIcon height={12} width={18} />,
-        placeholderIconInMobile: <FlagThailandIcon height={14.67} width={22} />,
+        code: 'TA',
+        displayName: 'தமிழ்',
+        // Using empty fragments instead of null to avoid potential runtime issues
+        // Tamil is spoken across multiple countries (India, Sri Lanka, Singapore, Malaysia)
+        // so no single flag is appropriate - icons are hidden via CSS anyway
+        icon: <></>,
+        placeholderIcon: <></>,
+        placeholderIconInMobile: <></>,
     },
     {
         code: 'TR',
@@ -135,14 +147,6 @@ export const LANGUAGES = [
         placeholderIcon: <FlagTurkeyIcon height={12} width={18} />,
         placeholderIconInMobile: <FlagTurkeyIcon height={14.67} width={22} />,
     },
-    {
-        code: 'UZ',
-        displayName: `O'zbek`,
-        icon: <FlagUzbekistanIcon height={24} width={36} />,
-        placeholderIcon: <FlagUzbekistanIcon height={12} width={18} />,
-        placeholderIconInMobile: <FlagUzbekistanIcon height={14.67} width={22} />,
-    },
-
     {
         code: 'VI',
         displayName: 'Tiếng Việt',
@@ -166,7 +170,29 @@ export const LANGUAGES = [
     },
 ];
 
-// Filtered languages for the language switcher (only show specific languages)
+// Available languages for the language switcher
+// This filter exists to control which languages are shown in the UI, allowing for
+// gradual rollout of new languages or temporary removal of languages if needed
+// Currently includes all defined languages
 export const FILTERED_LANGUAGES = LANGUAGES.filter(lang =>
-    ['EN', 'ES', 'FR', 'PT', 'AR', 'IT', 'RU', 'VI', 'TR', 'ZH_CN', 'ZH_TW', 'DE', 'BN', 'SW', 'KO'].includes(lang.code)
+    [
+        'EN',
+        'ES',
+        'FR',
+        'PT',
+        'AR',
+        'IT',
+        'RU',
+        'VI',
+        'TR',
+        'ZH_CN',
+        'ZH_TW',
+        'DE',
+        'BN',
+        'SW',
+        'KO',
+        'PL',
+        'KM',
+        'SI',
+    ].includes(lang.code)
 );

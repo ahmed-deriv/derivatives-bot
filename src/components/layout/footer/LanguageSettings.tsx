@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
 import Text from '@/components/shared_ui/text';
-import { FILTERED_LANGUAGES } from '@/utils/languages';
+import { LabelPairedGlobeSmRegularIcon } from '@deriv/quill-icons';
 import { useTranslations } from '@deriv-com/translations';
 import { Tooltip } from '@deriv-com/ui';
 
@@ -10,11 +9,6 @@ type TLanguageSettings = {
 
 const LanguageSettings = ({ openLanguageSettingModal }: TLanguageSettings) => {
     const { currentLang, localize } = useTranslations();
-
-    const countryIcon = useMemo(
-        () => FILTERED_LANGUAGES.find(({ code }: { code: string }) => code === currentLang)?.placeholderIcon,
-        [currentLang]
-    );
 
     return (
         <Tooltip
@@ -26,7 +20,7 @@ const LanguageSettings = ({ openLanguageSettingModal }: TLanguageSettings) => {
             aria-expanded='false'
             aria-haspopup='dialog'
         >
-            {countryIcon}
+            <LabelPairedGlobeSmRegularIcon />
             <Text size='xs' weight='bold'>
                 {currentLang}
             </Text>
