@@ -3,7 +3,7 @@ import { datadogRum } from '@datadog/browser-rum';
 const getConfigValues = (is_production: boolean) => {
     if (is_production) {
         return {
-            service: 'dbot',
+            service: 'bot.deriv.com',
             version: `v${process.env.REF_NAME}`,
             sessionReplaySampleRate: Number(process.env.DATADOG_SESSION_REPLAY_SAMPLE_RATE ?? 1),
             sessionSampleRate: Number(process.env.DATADOG_SESSION_SAMPLE_RATE ?? 10),
@@ -13,7 +13,7 @@ const getConfigValues = (is_production: boolean) => {
         };
     }
     return {
-        service: 'staging-dbot',
+        service: 'staging-bot.deriv.com',
         version: `v${process.env.REF_NAME}`,
         sessionReplaySampleRate: 0,
         sessionSampleRate: 100,
