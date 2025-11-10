@@ -4,6 +4,7 @@
  * This file contains centralized data constants and utility functions
  * to improve maintainability and provide consistent data across components.
  */
+import { localize } from '@deriv-com/translations';
 
 // Trading Times Data
 export const TRADING_TIMES = {
@@ -334,6 +335,79 @@ export const ACTIVE_SYMBOLS = [
         pip: 0.001,
     },
 ];
+
+// Helper function to get market display name
+export const getMarketDisplayName = market => {
+    const market_display_names = {
+        forex: localize('Forex'),
+        synthetic_index: localize('Derived'),
+        cryptocurrency: localize('Cryptocurrencies'),
+        commodities: localize('Commodities'),
+        stock_index: localize('Stock indices'),
+        indices: localize('Stock indices'),
+        basket_index: localize('Basket indices'),
+    };
+
+    return market_display_names[market] || market;
+};
+
+// Helper function to get subgroup display name
+export const getSubgroupDisplayName = (subgroup, market) => {
+    if (subgroup === 'none') {
+        return getMarketDisplayName(market);
+    }
+
+    const subgroup_display_names = {
+        synthetics: localize('Synthetics'),
+        baskets: localize('Baskets'),
+        major_pairs: localize('Major pairs'),
+        minor_pairs: localize('Minor pairs'),
+        smart_fx: localize('Smart FX'),
+        metals: localize('Metals'),
+        energy: localize('Energy'),
+        americas: localize('Americas'),
+        asia_oceania: localize('Asia/Oceania'),
+        europe_africa: localize('Europe/Africa'),
+    };
+
+    return subgroup_display_names[subgroup] || subgroup;
+};
+
+// Helper function to get submarket display name
+export const getSubmarketDisplayName = submarket => {
+    const submarket_display_names = {
+        major_pairs: localize('Major pairs'),
+        minor_pairs: localize('Minor pairs'),
+        smart_fx: localize('Smart FX'),
+        random_index: localize('Continuous indices'),
+        random_daily: localize('Daily reset indices'),
+        crash_boom: localize('Crash/Boom'),
+        crash_index: localize('Crash/Boom'),
+        step_indices: localize('Step indices'),
+        step_index: localize('Step indices'),
+        range_break: localize('Range break indices'),
+        jump_indices: localize('Jump indices'),
+        jump_index: localize('Jump indices'),
+        cryptocurrency: localize('Cryptocurrencies'),
+        non_stable_coin: localize('Cryptocurrencies'),
+        metals: localize('Metals'),
+        energy: localize('Energy'),
+        americas: localize('Americas'),
+        americas_OTC: localize('American indices'),
+        asia_oceania: localize('Asia/Oceania'),
+        asia_oceania_OTC: localize('Asian indices'),
+        europe_africa: localize('Europe/Africa'),
+        europe_OTC: localize('European indices'),
+        otc_index: localize('OTC indices'),
+        basket_forex: localize('Forex basket'),
+        forex_basket: localize('Forex basket'),
+        basket_commodities: localize('Commodities basket'),
+        commodity_basket: localize('Commodities basket'),
+        basket_cryptocurrency: localize('Cryptocurrency basket'),
+    };
+
+    return submarket_display_names[submarket] || submarket;
+};
 
 // Market and Submarket Mappings
 export const MARKET_MAPPINGS = {
