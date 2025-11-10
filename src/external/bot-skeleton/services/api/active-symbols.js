@@ -34,7 +34,6 @@ export default class ActiveSymbols {
 
         if (!is_forced_update && this.is_initialised) {
             await this.init_promise;
-            return this.active_symbols;
         }
 
         this.is_initialised = true;
