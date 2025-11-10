@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
-import { api_base } from '@/external/bot-skeleton';
 import chart_api from '@/external/bot-skeleton/services/api/chart-api';
 import { useSmartChartAdaptor } from '@/hooks/useSmartChartAdaptor';
 import { useStore } from '@/hooks/useStore';
@@ -16,9 +15,6 @@ const Chart = observer(({ show_digits_stats }: { show_digits_stats: boolean }) =
     const { chart_store, run_panel, dashboard } = useStore();
     const [isSafari, setIsSafari] = useState(false);
 
-    // Use the custom hook for SmartChart Adaptor
-    const { chartData, getQuotes, subscribeQuotes, unsubscribeQuotes } = useSmartChartAdaptor();
-
     const {
         chart_type,
         getMarketsOrder,
@@ -30,6 +26,9 @@ const Chart = observer(({ show_digits_stats }: { show_digits_stats: boolean }) =
         updateGranularity,
         updateSymbol,
     } = chart_store;
+
+    // Use the custom hook for SmartChart Adaptor
+    const { chartData, getQuotes, subscribeQuotes, unsubscribeQuotes } = useSmartChartAdaptor();
 
     const { isDesktop, isMobile } = useDevice();
     const { is_drawer_open } = run_panel;
@@ -62,83 +61,6 @@ const Chart = observer(({ show_digits_stats }: { show_digits_stats: boolean }) =
         if (!symbol) updateSymbol();
     }, [symbol, updateSymbol]);
 
-    const [forceChartRefresh, setForceChartRefresh] = useState(0);
-
-    useEffect(() => {
-        // FORCE INJECT 1s volatility indices directly into api_base.active_symbols
-        if (api_base.active_symbols && Array.isArray(api_base.active_symbols)) {
-            let symbols = [...api_base.active_symbols];
-
-            // Check if our symbols are already present
-            const existing_1s_symbols = symbols.filter((s: any) =>
-                ['1HZ15V', '1HZ30V', '1HZ90V'].includes(s.symbol || s.underlying_symbol)
-            );
-
-            if (existing_1s_symbols.length < 3) {
-                // Remove Spain 35 and any existing instances of our symbols
-                symbols = symbols.filter((symbol: any) => {
-                    const symbol_code = symbol.symbol || symbol.underlying_symbol;
-                    // symbol_code !== 'OTC_IBEX35' &&
-                    return !['1HZ15V', '1HZ30V', '1HZ90V'].includes(symbol_code);
-                });
-
-                // Force add our 1s volatility indices
-                const required_1s_symbols = [
-                    {
-                        symbol: '1HZ15V',
-                        underlying_symbol: '1HZ15V',
-                        display_name: 'Volatility 15 (1s) Index',
-                        market: 'synthetic_index',
-                        market_display_name: 'Derived',
-                        submarket: 'random_index',
-                        submarket_display_name: 'Continuous Indices',
-                        pip: 0.001,
-                        pip_size: 0.001,
-                        exchange_is_open: true,
-                        is_trading_suspended: false,
-                    },
-                    {
-                        symbol: '1HZ30V',
-                        underlying_symbol: '1HZ30V',
-                        display_name: 'Volatility 30 (1s) Index',
-                        market: 'synthetic_index',
-                        market_display_name: 'Derived',
-                        submarket: 'random_index',
-                        submarket_display_name: 'Continuous Indices',
-                        pip: 0.001,
-                        pip_size: 0.001,
-                        exchange_is_open: true,
-                        is_trading_suspended: false,
-                    },
-                    {
-                        symbol: '1HZ90V',
-                        underlying_symbol: '1HZ90V',
-                        display_name: 'Volatility 90 (1s) Index',
-                        market: 'synthetic_index',
-                        market_display_name: 'Derived',
-                        submarket: 'random_index',
-                        submarket_display_name: 'Continuous Indices',
-                        pip: 0.001,
-                        pip_size: 0.001,
-                        exchange_is_open: true,
-                        is_trading_suspended: false,
-                    },
-                ];
-
-                // Add our symbols
-                symbols.push(...required_1s_symbols);
-
-                // Replace the global api_base.active_symbols
-                api_base.active_symbols = symbols;
-
-                // Force chart to refresh by triggering a re-render
-                setTimeout(() => {
-                    setForceChartRefresh(prev => prev + 1);
-                }, 100);
-            }
-        }
-    }, [symbol]);
-
     if (!symbol || chartData.activeSymbols.length === 0) return null;
 
     const is_connection_opened = !!chart_api?.api;
@@ -153,8 +75,8 @@ const Chart = observer(({ show_digits_stats }: { show_digits_stats: boolean }) =
             dir='ltr'
         >
             <SmartChart
-                id={`dbot-${forceChartRefresh}`}
-                key={`chart-${forceChartRefresh}`}
+                id={`dbot-${symbol}`}
+                key={`chart-${symbol}`}
                 barriers={barriers}
                 showLastDigitStats={show_digits_stats}
                 chartControlsWidgets={null}
