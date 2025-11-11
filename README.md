@@ -1,4 +1,4 @@
-# Derivatives Bot
+# Derivatives Bot V2
 
 > A modern platform for automated derivatives trading with visual bot building, real-time analytics, and comprehensive tutorials.
 
